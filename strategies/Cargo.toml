@@ -1,0 +1,27 @@
+[package]
+name = "strategies"
+version = "0.1.0"
+edition = "2021"
+
+[[bench]]
+name = "atr"
+harness = false
+
+[[bench]]
+name = "rsi"
+harness = false
+
+
+[dependencies]
+binance-rs-async = { workspace = true }
+serde_json = { workspace = true }
+futures = { workspace = true }
+ta = { workspcae = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+async-trait = { workspace = true }
+ndarray = { workspace = true, features = ["rayon"] }
+rayon = { workspace = true }
+criterion = { workspace = true }
+unzip-n = "0.1.2"
+

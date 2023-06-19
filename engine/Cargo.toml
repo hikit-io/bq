@@ -1,0 +1,14 @@
+[package]
+name = "engine"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "main"
+
+[dependencies]
+binance-rs-async = { workspcae = true }
+strategies = { path = "../strategies" }
+tokio = {workspace = true}
+rayon = {workspace = true}
+serde = {workspace = true}
