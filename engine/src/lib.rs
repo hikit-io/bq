@@ -21,10 +21,7 @@ use strategies::{
     atr::AverageTrueRange, rsi::RelativeStrengthIndex, Category, Data, DataCategory, DataId,
     DataIndex, Index, Signal, Strategies, Strategy,
 };
-use tokio::{
-    sync::{broadcast, RwLock},
-    time,
-};
+use tokio::{sync::RwLock, time};
 
 use crate::channel::Broadcast;
 
@@ -36,6 +33,7 @@ mod instance;
 type Symbol = String;
 type OrderId = String;
 type DataChannelIndex = Index<Symbol>;
+type InstId = String;
 
 pub struct Engine {
     account: Account,
@@ -74,7 +72,7 @@ pub(crate) enum OrderStatus {
 }
 
 pub struct State {
-    instances: Vec<Instance>,
+    instances: HashMap<InstId, Instance>,
     optimal_price: Arc<RwLock<HashMap<Symbol, Price>>>,
     profit: Arc<RwLock<f64>>,
     principal: Arc<RwLock<f64>>,
@@ -104,7 +102,7 @@ impl Engine {
         let mut data_channels: HashMap<DataChannelIndex, Broadcast<Data>> = HashMap::new();
         let mut symbols = HashSet::new();
         let mut streams = HashSet::new();
-        let mut instances = Vec::new();
+        let mut instances = HashMap::new();
         let mut order_channel = Mpsc::default();
 
         for inst_conf in config.instances {
@@ -112,6 +110,7 @@ impl Engine {
             for strategy in inst_conf.strategies {
                 let (strategy, interval) = match strategy {
                     config::Strategy::Rsi {
+                        id,
                         strategy_type,
                         interval,
                         period,
@@ -127,6 +126,7 @@ impl Engine {
                         interval,
                     ),
                     config::Strategy::Atr {
+                        id,
                         strategy_type,
                         interval,
                         period,
@@ -150,11 +150,14 @@ impl Engine {
 
             // streams.insert(book_ticker_stream(&inst_conf.symbol));
 
-            instances.push(Instance::new(
-                &inst_conf.symbol.to_uppercase(),
-                inst_conf.mode.clone(),
-                strategies,
-            ));
+            instances.push(
+                inst_conf.id,
+                Instance::new(
+                    &inst_conf.symbol.to_uppercase(),
+                    inst_conf.mode.clone(),
+                    strategies,
+                ),
+            );
 
             data_channels.insert(
                 (inst_conf.symbol.to_uppercase(), Category::BookTicker).data_index(),
@@ -215,7 +218,7 @@ impl Engine {
             wss_streams: streams.into_iter().collect::<Vec<_>>(),
             wss: Some(wss),
             state: State {
-                instances,
+                instances: instances,
                 optimal_price: Default::default(),
                 profit: Default::default(),
                 principal: Arc::new(RwLock::new(config.principal)),

@@ -28,6 +28,9 @@ pub struct Config {
 
 #[derive(Serialize, Deserialize)]
 pub struct Instance {
+    #[serde(default)]
+    pub id: String,
+
     #[serde(rename = "symbol")]
     pub symbol: String,
 
@@ -48,6 +51,9 @@ pub struct Instance {
 #[serde(untagged)]
 pub enum Strategy {
     Rsi {
+        #[serde(default)]
+        id: String,
+
         #[serde(rename = "type")]
         strategy_type: StrategyType,
 
@@ -64,6 +70,9 @@ pub enum Strategy {
         sell_threshold: f64,
     },
     Atr {
+        #[serde(default)]
+        id: String,
+
         #[serde(rename = "type")]
         strategy_type: StrategyType,
 

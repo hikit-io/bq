@@ -1,28 +1,31 @@
-## 一个实例仅会持有一单，这单没卖出前不会下买单。
-## 止损模式： 下跌百分比，卖单超过n分钟没卖出重新挂单，重新挂单超过三次，以保本价卖出。保本价由引擎计算。
-
-principal = 34.25 # 可操作的本金
+principal = 34.25
 
 [[instances]]
-symbol = 'btcusdt' # 交易对
-mode = 'or' # 策略触发模式
-principal = 10.5 # 可操作的本金
-stop_loss = 0.1 # 止损下跌幅度
-[[instances.strategies]]
-type = 'rsi' # 策略类型 rsi atr boll macd 
-interval = '2h' # 数据维度
-period = 14 # 数据周期
-buy_threshold = 20.0 # 购买阈值
-sell_threshold = 80.0 # 出售阈值
-
-[[instances]]
-symbol = 'bnbusdt'
-mode = 'or'
+id = "e2587bad-25c5-4171-84cb-08ca1ce7c70e"
+symbol = "btcusdt"
+mode = "or"
+stop_loss = 0.1
 principal = 10.5
-stop_loss = 0.1 # 止损下跌幅度
+
 [[instances.strategies]]
-type = 'rsi'
-interval = '2h'
+id = "fe808f31-04b7-4119-8d89-6650a3e9695e"
+type = "rsi"
+interval = "2h"
+period = 14
+buy_threshold = 20.0
+sell_threshold = 80.0
+
+[[instances]]
+id = "9748c940-0209-422c-9846-6e6cc219c2d3"
+symbol = "bnbusdt"
+mode = "or"
+stop_loss = 0.1
+principal = 10.5
+
+[[instances.strategies]]
+id = "4b73a5df-b4c3-458d-9d24-022d169d9c35"
+type = "rsi"
+interval = "2h"
 period = 14
 buy_threshold = 20.0
 sell_threshold = 80.0

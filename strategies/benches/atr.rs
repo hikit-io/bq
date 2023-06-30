@@ -1,6 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-
-use strategies::atr::{calculate_atr_by_fold, calculate_atr_by_for, calculate_atr_by_ndarray, };
+use strategies::atr::{calculate_atr_by_fold, calculate_atr_by_for, calculate_atr_by_ndarray};
 
 fn build_prices() -> Vec<(f64, f64, f64)> {
     let mut a = vec![];
