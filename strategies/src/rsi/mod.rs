@@ -1,9 +1,9 @@
-use binance::{api::*, ws_model::*};
+use binance::api::*;
 use ndarray::{s, Array1};
 use rayon::prelude::*;
 use ta::Next;
 
-use crate::{Data, Signal, Strategy};
+use crate::{Data, KlineInterval, Signal, Strategy};
 
 pub mod backtest;
 
@@ -13,6 +13,25 @@ pub struct RelativeStrengthIndex {
     period: u64,
     buy_threshold: f64, // default
     sell_threshold: f64,
+
+    pub(crate) interval: KlineInterval,
+}
+
+impl RelativeStrengthIndex {
+    pub fn new(
+        period: u64,
+        interval: KlineInterval,
+        buy_threshold: f64,
+        sell_threshold: f64,
+    ) -> Self {
+        Self {
+            close_prices: vec![],
+            period,
+            interval,
+            buy_threshold,
+            sell_threshold,
+        }
+    }
 }
 
 impl Default for RelativeStrengthIndex {
@@ -22,6 +41,7 @@ impl Default for RelativeStrengthIndex {
             period: 14,
             buy_threshold: 30.,
             sell_threshold: 70.,
+            interval: KlineInterval::Day1,
         }
     }
 }
@@ -31,7 +51,7 @@ impl Strategy for RelativeStrengthIndex {
         let Data::Kline(data) = data else{
             return Signal::Nothing;
         };
-        let close_price: f64 = data.close;
+        let close_price: f64 = data.kline.close;
         self.close_prices.push(close_price);
 
         if self.close_prices.len() >= (self.period + 1) as usize {
@@ -163,14 +183,12 @@ pub fn calculate_rsi_by_rayon_and_ndarray(prices: &[f64], period: usize) -> f64 
 
 mod tests {
     use ndarray::array;
-    use ta::indicators::RelativeStrengthIndex;
-    use ta::Next;
+    use ta::{indicators::RelativeStrengthIndex, Next};
 
+    use super::calculate_rsi_by_ndarray;
     use crate::rsi::{
         calculate_rsi_by_for, calculate_rsi_by_rayon, calculate_rsi_by_rayon_and_ndarray,
     };
-
-    use super::calculate_rsi_by_ndarray;
 
     #[test]
     fn test_it() {

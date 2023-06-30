@@ -16,4 +16,8 @@ tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0.163" }
 async-trait = { version = "0.1.68" }
 rayon = { version = "1.7.0" }
-criterion = {version = "0.5.1",features = ["stable"]}
+criterion = { version = "0.5.1", features = ["stable"] }
+toml = "0.7.4"
+tracing = { version = "0.1.37" }
+tracing-subscriber = { version = "0.3.17",features = ["json"] }
+tokio-stream = "0.1.14"

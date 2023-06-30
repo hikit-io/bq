@@ -1,46 +1,86 @@
 use serde::{Deserialize, Serialize};
+use strategies::KlineInterval;
+
+use crate::instance::StrategyMode;
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-    #[serde(rename = "symbols")]
-    symbols: Vec<Symbol>,
-    #[serde(rename = "data_stream")]
-    data_stream: DataStream,
+    #[serde(rename = "principal")]
+    pub principal: f64,
+
+    //    #[serde(rename = "data_stream")]
+    //    pub data_stream: DataStream,
+    #[serde(rename = "instances")]
+    pub instances: Vec<Instance>,
 }
+//
+//#[derive(Serialize, Deserialize)]
+//pub struct DataStream {
+//    #[serde(rename = "kline")]
+//    pub kline: Kline,
+//}
+//
+//#[derive(Serialize, Deserialize)]
+//pub struct Kline {
+//    #[serde(rename = "interval")]
+//    pub interval: Vec<Interval>,
+//}
 
 #[derive(Serialize, Deserialize)]
-pub struct Symbol {
-    #[serde(rename = "name")]
-    name: String,
+pub struct Instance {
+    #[serde(rename = "symbol")]
+    pub symbol: String,
 
     #[serde(rename = "mode")]
-    mode: String,
+    pub mode: StrategyMode,
 
     #[serde(rename = "strategies")]
-    strategies: Strategies,
+    pub strategies: Vec<Strategy>,
+
+    #[serde(rename = "stop_loss")]
+    pub stop_loss: f64,
+
+    #[serde(rename = "principal")]
+    pub principal: f64,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Strategies {
-    #[serde(rename = "rsi")]
-    rsi: Atr,
+#[serde(untagged)]
+pub enum Strategy {
+    Rsi {
+        #[serde(rename = "type")]
+        strategy_type: StrategyType,
 
-    #[serde(rename = "atr")]
-    atr: Atr,
+        #[serde(rename = "interval")]
+        interval: KlineInterval,
+
+        #[serde(rename = "period")]
+        period: u64,
+
+        #[serde(rename = "buy_threshold")]
+        buy_threshold: f64,
+
+        #[serde(rename = "sell_threshold")]
+        sell_threshold: f64,
+    },
+    Atr {
+        #[serde(rename = "type")]
+        strategy_type: StrategyType,
+
+        #[serde(rename = "interval")]
+        interval: KlineInterval,
+
+        #[serde(rename = "period")]
+        period: u64,
+
+        #[serde(rename = "threshold")]
+        threshold: f64,
+    },
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Atr {
-    #[serde(rename = "peroid")]
-    peroid: i64,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct DataStream {
-    kline: Kline,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Kline {
-    interval: String,
+#[serde(rename_all = "lowercase")]
+pub enum StrategyType {
+    RSI,
+    ATR,
 }

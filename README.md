@@ -1,4 +1,4 @@
-#BQ
+# BQ
 
 1. 避免 `Box<Trait>` 动态分发:
    创建 `trait` 对象的规范方法是`Box<Trait>`，但大多数代码都可以使用`&mut Trait`，它也具有动态分派但节省了分配。如果您绝对需要所有权，请使用Box，但大多数用例都可以使用`&Trait`或`&mut Trait`

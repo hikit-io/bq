@@ -1,31 +1,34 @@
 use std::ops::Index;
 
 use binance::api::*;
-use binance::ws_model::Kline;
 use futures::Future;
 use ndarray::{azip, s, Array1};
 use rayon::prelude::*;
-use ta::Next;
 
-use crate::{Signal, Strategy, Data};
+use crate::{Data, KlineInterval, Signal, Strategy};
 
 pub mod backtest;
 
 pub struct AverageTrueRange {
-    period: usize,
-    stop_loss_coeff: f64,
-    take_profit_coeff: f64,
-
+    period: u64,
     hlc_prices: Vec<(f64, f64, f64)>,
+
+    pub(crate) interval: KlineInterval,
 }
 
 impl AverageTrueRange {
+    pub fn new(period: u64, interval: KlineInterval) -> Self {
+        Self {
+            period,
+            hlc_prices: vec![],
+            interval,
+        }
+    }
     pub fn new_with_init_data() -> Self {
         Self {
             period: 14,
-            stop_loss_coeff: 0.0,
-            take_profit_coeff: 0.0,
             hlc_prices: vec![],
+            interval: KlineInterval::Day1,
         }
     }
 }
@@ -36,11 +39,8 @@ impl Strategy for AverageTrueRange {
             return Signal::Nothing;
         };
         // perf: 一次性合并成三元组 避免不必要的zip
-        self.hlc_prices.push((
-            data.high,
-            data.low,
-            data.close,
-        ));
+        self.hlc_prices
+            .push((data.kline.high, data.kline.low, data.kline.close));
         if self.hlc_prices.len() >= (self.period + 1) as usize {
             let atr = calculate_atr(&self.hlc_prices, self.period);
 
@@ -59,11 +59,11 @@ impl Strategy for AverageTrueRange {
     }
 }
 
-pub fn calculate_atr(hlc_prices: &[(f64, f64, f64)], atr_period: usize) -> f64 {
+pub fn calculate_atr(hlc_prices: &[(f64, f64, f64)], atr_period: u64) -> f64 {
     calculate_atr_by_fold(hlc_prices, atr_period)
 }
 
-pub fn calculate_atr_by_for(hlc_prices: &[(f64, f64, f64)], atr_period: usize) -> f64 {
+pub fn calculate_atr_by_for(hlc_prices: &[(f64, f64, f64)], atr_period: u64) -> f64 {
     let mut tr_sum = 0.0;
     let mut prev_close = hlc_prices[0].2;
 
@@ -78,7 +78,7 @@ pub fn calculate_atr_by_for(hlc_prices: &[(f64, f64, f64)], atr_period: usize) -
     atr
 }
 
-pub fn calculate_atr_by_fold(hlc_prices: &[(f64, f64, f64)], atr_period: usize) -> f64 {
+pub fn calculate_atr_by_fold(hlc_prices: &[(f64, f64, f64)], atr_period: u64) -> f64 {
     // perf 不使用库，避免拷贝
     let tr_sum = hlc_prices
         .windows(2)
@@ -126,8 +126,7 @@ pub fn calculate_atr_by_ndarray(hlc_prices: &[(f64, f64, f64)], atr_period: usiz
 mod tests {
     use std::fmt::Display;
 
-    use ta::indicators::AverageTrueRange;
-    use ta::{Close, High, Low, Next};
+    use ta::{indicators::AverageTrueRange, Close, High, Low, Next};
 
     use crate::atr::{calculate_atr_by_fold, calculate_atr_by_for, calculate_atr_by_ndarray};
 

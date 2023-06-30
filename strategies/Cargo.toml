@@ -16,12 +16,10 @@ harness = false
 binance-rs-async = { workspace = true }
 serde_json = { workspace = true }
 futures = { workspace = true }
-ta = { workspcae = true }
+ta = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
 async-trait = { workspace = true }
 ndarray = { workspace = true, features = ["rayon"] }
 rayon = { workspace = true }
 criterion = { workspace = true }
-unzip-n = "0.1.2"
-

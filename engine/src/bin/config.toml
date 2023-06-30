@@ -1,0 +1,20 @@
+
+principal = 20 # 可操作的资金额度
+
+
+[data_stream]
+[data_stream.kline]
+interval = [
+	'1h',
+	'2h',
+	'6h',
+]
+[[instances]]
+symbol = 'btcusdt'
+mode = 'or'
+[[instances.strategies]]
+type = 'rsi'
+interval = '2h'
+period = 14
+buy_threshold = 30.0
+sell_threshold = 30.0
