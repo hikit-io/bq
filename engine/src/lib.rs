@@ -28,7 +28,6 @@ use tokio::{
 
 use crate::channel::Broadcast;
 
-mod account;
 mod action;
 mod channel;
 pub mod config;
